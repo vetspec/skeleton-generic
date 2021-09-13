@@ -15,4 +15,8 @@ updates:
   - package-ecosystem: "terraform"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      day: "monday"
+      time: "09:30"
+      timezone: "America/New_York"
+    target-branch: "testing/dependabot_for_terraform"
