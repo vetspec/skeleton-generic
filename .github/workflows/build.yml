@@ -19,6 +19,12 @@ jobs:
     steps:
       - uses: cisagov/setup-env-github-action@bug/correctly_set_outputs
         id: setup-env
+      - name: Check environment versions
+        run: |
+          echo "${{ steps.setup-env.outputs.packer-version }}"
+          echo "${{ steps.setup-env.outputs.shfmt-version }}"
+          echo "${{ steps.setup-env.outputs.terraform-version }}"
+          echo "${{ steps.setup-env.outputs.terraform-docs-version }}"
       - uses: actions/checkout@v2
       - id: setup-python
         uses: actions/setup-python@v2
