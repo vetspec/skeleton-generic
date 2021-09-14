@@ -17,7 +17,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: cisagov/setup-env-github-action@develop
+      - uses: cisagov/setup-env-github-action@bug/correctly_set_outputs
+        id: setup-env
       - uses: actions/checkout@v2
       - id: setup-python
         uses: actions/setup-python@v2
@@ -42,8 +43,8 @@ jobs:
           BASE_CACHE_KEY: "${{ github.job }}-${{ runner.os }}-\
             py${{ steps.setup-python.outputs.python-version }}-\
             go${{ env.GO_VERSION }}-\
-            packer${{ env.PACKER_VERSION }}-\
-            tf${{ env.TERRAFORM_VERSION }}-"
+            packer${{ steps.setup-env.outputs.packer-version }}-\
+            tf${{ steps.setup-env.outputs.terraform-version }}-"
         with:
           # Note that the .terraform directory IS NOT included in the
           # cache because if we were caching, then we would need to use
@@ -77,13 +78,17 @@ jobs:
           sudo ln -s /opt/packer/packer /usr/local/bin/packer
       - uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_version: ${{ steps.setup-env.outputs.terraform-version }}
       - name: Install shfmt
-        run: go install mvdan.cc/sh/v3/cmd/shfmt@${SHFMT_VERSION}
+        run: go install ${{ env.PACKAGE_SOURCE }}@${{ env.PACKAGE_VERSION }}
+        env:
+          PACKAGE_SOURCE: mvdan.cc/sh/v3/cmd/shfmt
+          PACKAGE_VERSION: ${{ steps.setup-env.outputs.shfmt-version }}
       - name: Install Terraform-docs
-        run: |
-          go install \
-            github.com/terraform-docs/terraform-docs@${TERRAFORM_DOCS_VERSION}
+        run: go install ${{ env.PACKAGE_SOURCE }}@${{ env.PACKAGE_VERSION }}
+        env:
+          PACKAGE_SOURCE: github.com/terraform-docs/terraform-docs
+          PACKAGE_VERSION: ${{ steps.setup-env.outputs.terraform-docs-version }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
